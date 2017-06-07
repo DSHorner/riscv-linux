@@ -114,6 +114,9 @@ config ARCH_RV32I
 	bool "RV32I"
 	select CPU_SUPPORTS_32BIT_KERNEL
 	select 32BIT
+	select GENERIC_ASHLDI3
+	select GENERIC_ASHRDI3
+	select GENERIC_LSHRDI3
 
 config ARCH_RV64I
 	bool "RV64I"
@@ -130,16 +133,6 @@ config TUNE_GENERIC
 	bool "generic"
 
 endchoice
-
-config SBI_CONSOLE
-	tristate "SBI console support"
-	select TTY
-	default y
-	help
-	   This enables support for console output via RISC-V SBI calls, which
-	   is normally used only during boot to output printk.
-
-	   If you don't know what do to here, say Y.
 
 config ISA_C
 	bool "Emit compressed instructions when building Linux"

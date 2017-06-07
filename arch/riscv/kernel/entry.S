@@ -28,7 +28,7 @@
  * stack.
  */
 	.macro SAVE_ALL
-	LOCAL _restore_kernel_sp
+	LOCAL _restore_kernel_tpsp
 	LOCAL _save_context
 
 	/* If coming from userspace, preserve the user thread pointer and load
@@ -37,12 +37,13 @@
 	csrrw tp, sscratch, tp
 	bnez tp, _save_context
 
-_restore_kernel_sp:
+_restore_kernel_tpsp:
 	csrr tp, sscratch
+	REG_S sp, TASK_TI_KERNEL_SP(tp)
 _save_context:
 	REG_S sp, TASK_TI_USER_SP(tp)
 	REG_L sp, TASK_TI_KERNEL_SP(tp)
-	addi sp, sp, -(PT_SIZE)
+	addi sp, sp, -(PT_SIZE_ON_STACK)
 	REG_S x1,  PT_RA(sp)
 	REG_S x3,  PT_GP(sp)
 	REG_S x5,  PT_T0(sp)
@@ -216,7 +217,7 @@ resume_userspace:
 	bnez s1, work_pending
 
 	/* Save unwound kernel stack pointer in thread_info */
-	addi s0, sp, PT_SIZE
+	addi s0, sp, PT_SIZE_ON_STACK
 	REG_S s0, TASK_TI_KERNEL_SP(tp)
 
 	/* Save TP into sscratch, so we can find the kernel data structures
